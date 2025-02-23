@@ -3,6 +3,7 @@ myenv
 
 papers
 paper_summaries.json
+settings.json
 
 .vscode
 __pycache__
