@@ -103,4 +103,4 @@ Profiles can be customized with:
 
 ## License
 
-[License information here]
+MIT License
