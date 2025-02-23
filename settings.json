@@ -1,0 +1,146 @@
+{
+    "profiles": [
+        {
+            "name": "Undergraduate Student",
+            "description": "An undergraduate student seeking to understand research papers for coursework or initial research",
+            "constraints": [
+                "Use clear, accessible language avoiding complex jargon",
+                "Define any necessary technical terms",
+                "Maximum 250 words for summary",
+                "Focus on practical applications and real-world examples",
+                "Include a brief background context",
+                "Highlight key takeaways in bullet points",
+                "Explain methodology in simplified terms",
+                "Include 2-3 relevant study limitations",
+                "Add suggested further readings at basic level",
+                "Knowledge level: Basic academic understanding"
+            ],
+            "outputStyle": {
+                "language": "conversational",
+                "technicalLevel": "basic",
+                "structurePreference": "bullet-points",
+                "responseLanguage": "English",
+                "visualAids": true
+            },
+            "selected": false
+        },
+        {
+            "name": "Graduate Researcher",
+            "description": "A graduate student or early-career researcher conducting detailed literature review",
+            "constraints": [
+                "Maintain technical accuracy with field-specific terminology",
+                "Maximum 750 words for comprehensive analysis",
+                "Deep dive into methodology and statistical significance",
+                "Critical analysis of research design",
+                "Detailed examination of results and implications",
+                "Compare with related works in the field",
+                "Identify research gaps and future directions",
+                "Include confidence intervals and p-values where relevant",
+                "Analyze limitations and potential biases",
+                "Evaluate reproducibility of results",
+                "Suggest potential applications and extensions"
+            ],
+            "outputStyle": {
+                "language": "academic",
+                "technicalLevel": "advanced",
+                "structurePreference": "detailed-sections",
+                "responseLanguage": "English",
+                "visualAids": true,
+                "citationStyle": "APA"
+            },
+            "selected": false
+        },
+        {
+            "name": "Senior Academic",
+            "description": "An experienced professor or senior researcher requiring high-level analysis",
+            "constraints": [
+                "Provide sophisticated technical analysis",
+                "Maximum 1000 words for deep analysis",
+                "Evaluate theoretical foundations and assumptions",
+                "Cross-reference with current state-of-art",
+                "Analyze methodological innovations",
+                "Examine statistical robustness",
+                "Discuss broader implications for the field",
+                "Identify paradigm shifts if any",
+                "Critical evaluation of author's claims",
+                "Suggest potential collaborative research directions",
+                "Analysis of funding implications",
+                "Policy and practical implementation considerations"
+            ],
+            "outputStyle": {
+                "language": "expert",
+                "technicalLevel": "expert",
+                "structurePreference": "comprehensive",
+                "citationStyle": "field-specific",
+                "responseLanguage": "English",
+                "visualAids": true
+            },
+            "selected": false
+        },
+        {
+            "name": "Industry Professional",
+            "description": "A practitioner looking to apply research findings in industry settings",
+            "constraints": [
+                "Focus on practical applications and implementation",
+                "Maximum 500 words for actionable summary",
+                "Highlight commercial viability",
+                "Cost-benefit analysis perspective",
+                "Implementation challenges and solutions",
+                "Resource requirements and scalability",
+                "Risk assessment and mitigation strategies",
+                "Market impact analysis",
+                "Regulatory compliance considerations",
+                "Timeline for practical implementation",
+                "Required technical infrastructure"
+            ],
+            "outputStyle": {
+                "language": "business-oriented",
+                "technicalLevel": "intermediate",
+                "structurePreference": "executive-summary",
+                "focusArea": "implementation"
+            },
+            "selected": false
+        },
+        {
+            "name": "Interdisciplinary Scholar",
+            "description": "A researcher looking to understand papers outside their primary field",
+            "constraints": [
+                "Provide cross-disciplinary context",
+                "Maximum 600 words for comprehensive overview",
+                "Define field-specific terminology",
+                "Draw parallels with other disciplines",
+                "Highlight transferable concepts",
+                "Explain methodology for non-experts",
+                "Identify cross-disciplinary applications",
+                "Suggest collaborative opportunities",
+                "Compare with similar approaches in other fields",
+                "Analyze potential for interdisciplinary integration"
+            ],
+            "outputStyle": {
+                "language": "cross-disciplinary",
+                "technicalLevel": "adaptive",
+                "structurePreference": "comparative",
+                "contextLevel": "broad",
+                "responseLanguage": "English",
+                "visualAids": true
+            },
+            "selected": false
+        },
+        {
+            "name": "14 year old wonder child",
+            "description": "I am a 14 year old wonder child that can understand any topics as long as its explain to me in poems",
+            "constraints": [
+                "max 300 words",
+                "must be a poem"
+            ],
+            "outputStyle": {
+                "language": "conversational",
+                "technicalLevel": "basic",
+                "structurePreference": "paragraph",
+                "visualAids": false,
+                "responseLanguage": "English"
+            },
+            "selected": true
+        }
+    ]
+}

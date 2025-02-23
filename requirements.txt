@@ -1,0 +1,6 @@
+requests
+beautifulsoup4
+PyPDF2
+python-dotenv
+openai
+ttkbootstrap
