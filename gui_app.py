@@ -145,20 +145,68 @@ class SciSiftGUI:
         self.paper_input_frame = ttk.Frame(self.paper_frame)
         self.paper_input_frame.pack(fill='x', padx=10, pady=5)
         
-        self.paper_input = ttk.Combobox(self.paper_input_frame)
-        self.paper_input.pack(side='left', expand=True, fill='x', padx=(0, 5))
+        # Create both input types
+        self.file_input = ttk.Combobox(
+            self.paper_input_frame,
+            state="readonly"
+        )
+        self.url_input = ttk.Entry(
+            self.paper_input_frame,
+            font=('Segoe UI', 10)
+        )
+        
+        # Initially show file input
+        self.file_input.pack(side='left', expand=True, fill='x', padx=(0, 5))
+        
+        # Button frame for analyze and clear
+        button_frame = ttk.Frame(self.paper_input_frame)
+        button_frame.pack(side='right')
+        
+        self.clear_button = ttk.Button(
+            button_frame,
+            text="Clear",
+            command=self._clear_paper_results,
+            style='secondary.TButton'
+        )
+        self.clear_button.pack(side='left', padx=5)
         
         self.analyze_button = ttk.Button(
-            self.paper_input_frame, text="Analyze",
-            command=self._analyze_paper
+            button_frame,
+            text="Analyze",
+            command=self._analyze_paper,
+            style='primary.TButton'
         )
-        self.analyze_button.pack(side='right')
+        self.analyze_button.pack(side='left')
         
-        # Results
-        self.paper_results = scrolledtext.ScrolledText(
-            self.paper_frame, wrap=tk.WORD, height=15
+        # Results frame with copy button
+        results_frame = ttk.Frame(self.paper_frame)
+        results_frame.pack(fill='both', expand=True, padx=10, pady=5)
+        
+        results_header = ttk.Frame(results_frame)
+        results_header.pack(fill='x', pady=(0, 5))
+        
+        ttk.Label(
+            results_header,
+            text="Analysis Results",
+            font=('Segoe UI', 10, 'bold')
+        ).pack(side='left')
+        
+        self.copy_button = ttk.Button(
+            results_header,
+            text="Copy",
+            command=self._copy_results,
+            style='secondary.TButton'
         )
-        self.paper_results.pack(expand=True, fill='both', padx=10, pady=5)
+        self.copy_button.pack(side='right')
+        
+        # Results text area
+        self.paper_results = scrolledtext.ScrolledText(
+            results_frame,
+            wrap=tk.WORD,
+            height=15,
+            font=('Segoe UI', 10)
+        )
+        self.paper_results.pack(fill='both', expand=True)
         
         # Update paper list when source changes
         self.source_var.trace('w', lambda *args: self._update_paper_source())
@@ -292,39 +340,107 @@ class SciSiftGUI:
         self.message_input.focus()
         loader.destroy()
 
-    def _update_paper_source(self):
+    def _clear_paper_results(self):
+        """Clear the paper analysis results"""
+        self.paper_results.delete(1.0, tk.END)
         if self.source_var.get() == "file":
-            # List files in papers directory
-            papers = [f for f in listdir(papers_dir) if isfile(join(papers_dir, f))]
-            self.paper_input['values'] = papers
-            self.paper_input.set("Select a paper file...")
+            self.file_input.set("Select a paper file...")
         else:
-            self.paper_input['values'] = []
-            self.paper_input.set("Enter paper URL...")
+            self.url_input.delete(0, tk.END)
+            self.url_input.insert(0, "Enter paper URL...")
+
+    def _copy_results(self):
+        """Copy paper analysis results to clipboard"""
+        results = self.paper_results.get(1.0, tk.END).strip()
+        if results:
+            self.root.clipboard_clear()
+            self.root.clipboard_append(results)
+            messagebox.showinfo("Success", "Results copied to clipboard!")
+        else:
+            messagebox.showwarning("Warning", "No results to copy")
 
     def _analyze_paper(self):
         source = self.source_var.get()
-        paper_input = self.paper_input.get()
+        paper_input = self.file_input.get() if source == "file" else self.url_input.get()
         
-        if not paper_input or paper_input.startswith("Select") or paper_input.startswith("Enter"):
+        if not paper_input or paper_input in ["Select a paper file...", "Enter paper URL..."]:
             messagebox.showwarning("Warning", "Please select a paper or enter a URL")
             return
         
-        try:
-            if source == "file":
-                paper_path = join(papers_dir, paper_input)
-                result = explain_paper("file", paper_path=paper_path)
-            else:
-                result = explain_paper("url", url=paper_input)
-            
-            if result is None:
-                messagebox.showerror("Error", "Failed to get analysis result")
-                return
+        # Disable inputs while processing
+        self.file_input.configure(state='disabled')
+        self.url_input.configure(state='disabled')
+        self.analyze_button.configure(state='disabled')
+        self.clear_button.configure(state='disabled')
+        self.copy_button.configure(state='disabled')
+        
+        # Show loader
+        loader = LoaderDialog(self.root, "Analyzing paper...")
+        
+        def analyze():
+            try:
+                if source == "file":
+                    paper_path = join(papers_dir, paper_input)
+                    result = explain_paper("file", paper_path=paper_path)
+                else:
+                    result = explain_paper("url", url=paper_input)
                 
-            self.paper_results.delete(1.0, tk.END)
-            self.paper_results.insert(tk.END, str(result))
-        except Exception as e:
-            messagebox.showerror("Error", f"Failed to analyze paper: {str(e)}")
+                if result is None:
+                    self.root.after(0, lambda: messagebox.showerror("Error", "Failed to get analysis result"))
+                    return
+                    
+                # Update UI in main thread
+                self.root.after(0, lambda: self._update_paper_results(result))
+            except Exception as e:
+                self.root.after(0, lambda: messagebox.showerror("Error", f"Failed to analyze paper: {str(e)}"))
+            finally:
+                # Clean up in main thread
+                self.root.after(0, lambda: self._cleanup_after_analysis(loader))
+        
+        # Start analysis in background
+        threading.Thread(target=analyze, daemon=True).start()
+
+    def _update_paper_results(self, result):
+        """Update the paper results text area"""
+        self.paper_results.delete(1.0, tk.END)
+        self.paper_results.insert(tk.END, str(result))
+
+    def _cleanup_after_analysis(self, loader):
+        """Clean up after paper analysis"""
+        if self.source_var.get() == "file":
+            self.file_input.configure(state='readonly')
+        else:
+            self.url_input.configure(state='normal')
+        self.analyze_button.configure(state='normal')
+        self.clear_button.configure(state='normal')
+        self.copy_button.configure(state='normal')
+        loader.destroy()
+
+    def _update_paper_source(self):
+        if self.source_var.get() == "file":
+            # Switch to file input
+            self.url_input.pack_forget()
+            self.file_input.pack(side='left', expand=True, fill='x', padx=(0, 5))
+            # List files in papers directory
+            papers = [f for f in listdir(papers_dir) if isfile(join(papers_dir, f))]
+            self.file_input['values'] = papers
+            self.file_input.set("Select a paper file...")
+        else:
+            # Switch to URL input
+            self.file_input.pack_forget()
+            self.url_input.pack(side='left', expand=True, fill='x', padx=(0, 5))
+            self.url_input.delete(0, tk.END)
+            self.url_input.insert(0, "Enter paper URL...")
+            self.url_input.bind('<FocusIn>', lambda e: self._on_url_focus_in())
+            self.url_input.bind('<FocusOut>', lambda e: self._on_url_focus_out())
+
+    def _on_url_focus_in(self):
+        if self.url_input.get() == "Enter paper URL...":
+            self.url_input.delete(0, tk.END)
+
+    def _on_url_focus_out(self):
+        if not self.url_input.get().strip():
+            self.url_input.insert(0, "Enter paper URL...")
 
     def _update_profile_list(self):
         self.profile_listbox.delete(0, tk.END)

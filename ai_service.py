@@ -1,6 +1,7 @@
 from openai import OpenAI
 import os
 from profile_manager import ProfileManager
+from summary_manager import SummaryManager
 from PyPDF2 import PdfReader
 import mimetypes
 
@@ -10,6 +11,7 @@ client = OpenAI(
 )
 
 profile_manager = ProfileManager()
+summary_manager = SummaryManager()
 
 def _get_profile_context():
     active_profile = profile_manager.get_active_profile()
@@ -95,9 +97,37 @@ def chat_with_ai(message, file_path=None, model="google/gemini-2.0-flash-001", u
     return completion.choices[0].message.content
 
 def explain_paper(type, paper_path=None, url=None, model="google/gemini-2.0-flash-001"):
+    active_profile = profile_manager.get_active_profile()
+    profile_name = active_profile['name'] if active_profile else None
+
     if type == "file":
         message = "Please analyze and explain the following paper:"
-        return chat_with_ai(message, file_path=paper_path, model=model, use_profile=True)
+        file_content = _read_file_content(paper_path)
+        if file_content.startswith("Error:") or not isinstance(file_content, str):
+            return file_content
+
+        # Check for existing summary
+        existing_summary = summary_manager.get_summary(file_content, profile_name)
+        if existing_summary:
+            return existing_summary
+
+        # Generate new summary
+        summary = chat_with_ai(message, file_path=paper_path, model=model, use_profile=True)
+        if summary:
+            summary_manager.save_summary(file_content, summary, profile_name)
+        return summary
     else:
+        if not url:
+            return "Error: URL is required for URL-based paper analysis"
+            
         message = f"Please analyze and explain the paper at this URL: {url}"
-        return chat_with_ai(message, model=model, use_profile=True)
+        # For URLs, we'll use the URL itself as the content key
+        existing_summary = summary_manager.get_summary(url, profile_name)
+        if existing_summary:
+            return existing_summary
+
+        # Generate new summary
+        summary = chat_with_ai(message, model=model, use_profile=True)
+        if summary:
+            summary_manager.save_summary(url, summary, profile_name)
+        return summary
