@@ -127,15 +127,18 @@
             "selected": false
         },
         {
-            "name": "14 year old wonder child",
-            "description": "I am a 14 year old wonder child that can understand any topics as long as its explain to me in poems",
+            "name": "Software Engineering student",
+            "description": "I am a software engineer in the making",
             "constraints": [
-                "max 300 words",
-                "must be a poem"
+                "max 500 words",
+                "Return the answer directly",
+                "explain to me in the level of a software engineering student",
+                "make sure to explain vague terms etc",
+                "write in a l33t w4y"
             ],
             "outputStyle": {
-                "language": "conversational",
-                "technicalLevel": "basic",
+                "language": "formal",
+                "technicalLevel": "advanced",
                 "structurePreference": "paragraph",
                 "visualAids": false,
                 "responseLanguage": "English"

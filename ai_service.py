@@ -4,6 +4,9 @@ from profile_manager import ProfileManager
 from summary_manager import SummaryManager
 from PyPDF2 import PdfReader
 import mimetypes
+from dotenv import load_dotenv
+
+load_dotenv();
 
 client = OpenAI(
   base_url=os.getenv("OPENROUTER_API_URL"),

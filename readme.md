@@ -14,7 +14,6 @@ SciSift is an intelligent agent that analyzes and summarizes scientific articles
 
 The project requires the following Python packages:
 - `requests`: HTTP library for API requests
-- `beautifulsoup4`: Library for parsing HTML and XML documents
 - `PyPDF2`: PDF processing library
 - `python-dotenv`: Environment variable management
 - `openai`: OpenAI API client
@@ -32,7 +31,7 @@ cd scisift
 
 2. Create a virtual environment:
 ```bash
-python -m venv myenv
+python3 -m venv myenv
 source myenv/bin/activate  # On Windows: myenv\Scripts\activate
 ```
 
